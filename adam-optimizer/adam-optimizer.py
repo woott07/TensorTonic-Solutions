@@ -15,14 +15,19 @@ def adam_step(
     Returns (param_new, m_new, v_new) as NumPy arrays.
     """
     # Write code here
-    param = np.array(param, dtype=float)
-    grad = np.array(grad, dtype=float)
-    m = np.array(m, dtype=float)
-    v = np.array(v, dtype=float)
-    
-    m[:] = beta1*m + (1.0-beta1)*grad
-    v[:] = beta2*v + (1.0-beta2)*(grad**2)
-    m_hat = m/(1.0-(beta1**t))
-    v_hat = v/(1.0-(beta2**t))
-    param -= (lr/(np.sqrt(v_hat)+eps))*m_hat
-    return param,m,v
+    param = np.asarray(param, dtype=float).copy()
+    grad = np.asarray(grad, dtype=float)
+    m = np.asarray(m, dtype=float).copy()
+    v = np.asarray(v, dtype=float).copy()
+
+    m *= beta1
+    m += (1.0 - beta1) * grad
+    v *= beta2
+    v += (1.0 - beta2) * (grad * grad)
+
+    bias_c1 = 1.0 - beta1 ** t
+    bias_c2 = 1.0 - beta2 ** t
+    step_size = lr / bias_c1
+
+    param -= step_size * m / (np.sqrt(v / bias_c2) + eps)
+    return param, m, v
